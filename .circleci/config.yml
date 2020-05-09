@@ -1,0 +1,28 @@
+version: 2.1
+jobs:
+  build-and-test:
+    docker:
+      - image: circleci/node:10
+        environment:
+          NODE_ENV: test
+          TYPEORM_USERNAME: test
+          TYPEORM_PASSWORD: test
+          TYPEORM_NAME: test
+          TYPEORM_HOSTNAME: 127.0.0.1
+      - image: circleci/postgres:10-alpine
+        environment:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_USER: test
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run build
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: npm run test
+      - run: npm run test:e2e
+
+workflows:
+  build-and-test:
+    jobs:
+      - build-and-test
